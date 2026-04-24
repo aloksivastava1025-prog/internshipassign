@@ -1,4 +1,5 @@
 import { initializeApp } from 'firebase/app';
+import { getAuth, GoogleAuthProvider } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 const firebaseConfig = {
@@ -14,10 +15,16 @@ const hasFirebaseConfig = Object.values(firebaseConfig).every(Boolean);
 
 let app = null;
 let db = null;
+let auth = null;
+let googleProvider = null;
 
 if (hasFirebaseConfig) {
   app = initializeApp(firebaseConfig);
   db = getFirestore(app);
+  auth = getAuth(app);
+  googleProvider = new GoogleAuthProvider();
+  // Always prompt account selection even if user is already signed in
+  googleProvider.setCustomParameters({ prompt: 'select_account' });
 }
 
-export { app, db, hasFirebaseConfig };
+export { app, db, auth, googleProvider, hasFirebaseConfig };

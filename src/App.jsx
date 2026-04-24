@@ -8,6 +8,7 @@ import {
   logoutUser,
   persistenceMode,
   saveRegistration,
+  signInWithGoogle,
   signupUser,
   subscribeToRegistrationForUser,
   subscribeToRegistrations,
@@ -68,18 +69,21 @@ function App() {
   const [selectedRegistrationId, setSelectedRegistrationId] = useState('');
   const [storageReady, setStorageReady] = useState(false);
   const [storageError, setStorageError] = useState('');
+  const [googleLoading, setGoogleLoading] = useState(false);
 
   useEffect(() => {
     const boot = async () => {
       try {
         await initializeStorage();
+      } catch (error) {
+        // Non-fatal: show a banner but don't block the UI
+        setStorageError(error.message);
+      } finally {
+        // Always restore session from localStorage regardless of Firebase state
         const sessionUser = getSessionUser();
         if (sessionUser) {
           setCurrentUser(sessionUser);
         }
-      } catch (error) {
-        setStorageError(error.message);
-      } finally {
         setStorageReady(true);
       }
     };
@@ -117,6 +121,20 @@ function App() {
 
     return () => unsubscribe();
   }, [currentUser, storageReady]);
+
+  const handleGoogleSignIn = async () => {
+    setAuthError('');
+    setGoogleLoading(true);
+    try {
+      const user = await signInWithGoogle();
+      setCurrentUser(user);
+      setActiveStep(1);
+    } catch (error) {
+      setAuthError(error.message);
+    } finally {
+      setGoogleLoading(false);
+    }
+  };
 
   const handleAuthInputChange = (event) => {
     const { name, value } = event.target;
@@ -223,8 +241,8 @@ function App() {
     moveStep(2);
   };
 
-  const handleLogout = () => {
-    logoutUser();
+  const handleLogout = async () => {
+    await logoutUser();
     setCurrentUser(null);
     setMode('login');
     setAuthError('');
@@ -392,13 +410,14 @@ function App() {
               {authEntry !== 'admin' ? (
                 <>
                   <div className="social-row" aria-label="Social login options">
-                    <button type="button" className="social-button">
+                    <button
+                      type="button"
+                      className="social-button"
+                      onClick={handleGoogleSignIn}
+                      disabled={googleLoading}
+                    >
                       <span className="social-mark google">G</span>
-                      Google
-                    </button>
-                    <button type="button" className="social-button">
-                      <span className="social-mark github">G</span>
-                      Github
+                      {googleLoading ? 'Signing in…' : 'Google'}
                     </button>
                   </div>
 
