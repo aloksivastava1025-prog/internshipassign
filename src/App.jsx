@@ -61,10 +61,12 @@ function App() {
   const [activeStep, setActiveStep] = useState(1);
   const [formData, setFormData] = useState(initialFormState);
   const [formMessage, setFormMessage] = useState('');
+  const [submissionComplete, setSubmissionComplete] = useState(false);
   const [registrations, setRegistrations] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
-  const [authTheme, setAuthTheme] = useState('dark');
+  const [authTheme, setAuthTheme] = useState('light');
   const [adminTheme, setAdminTheme] = useState('light');
+  const [adminSidebarOpen, setAdminSidebarOpen] = useState(false);
   const [adminSearch, setAdminSearch] = useState('');
   const [selectedRegistrationId, setSelectedRegistrationId] = useState('');
   const [storageReady, setStorageReady] = useState(false);
@@ -177,6 +179,7 @@ function App() {
       [name]: value,
     }));
     setFormMessage('');
+    setSubmissionComplete(false);
   };
 
   const handleAvailabilityToggle = (day) => {
@@ -190,6 +193,7 @@ function App() {
       };
     });
     setFormMessage('');
+    setSubmissionComplete(false);
   };
 
   const validateStep = (stepId) => {
@@ -224,7 +228,8 @@ function App() {
     }
 
     await saveRegistration(formData, currentUser);
-    setFormMessage('Your volunteer profile has been saved successfully.');
+    setFormMessage('');
+    setSubmissionComplete(true);
   };
 
   const moveStep = (nextStep) => {
@@ -234,6 +239,7 @@ function App() {
     }
 
     setFormMessage('');
+    setSubmissionComplete(false);
     setActiveStep(nextStep);
   };
 
@@ -247,7 +253,13 @@ function App() {
     setMode('login');
     setAuthError('');
     setFormMessage('');
+    setSubmissionComplete(false);
     setActiveStep(1);
+    setAdminSidebarOpen(false);
+  };
+
+  const closeAdminSidebar = () => {
+    setAdminSidebarOpen(false);
   };
 
   const filteredRegistrations = registrations.filter((registration) => {
@@ -537,7 +549,16 @@ function App() {
   if (currentUser.role === 'admin') {
     return (
       <div className={`app-shell dashboard-shell admin-shell admin-theme-${adminTheme}`}>
-        <aside className="admin-sidebar">
+        {adminSidebarOpen ? (
+          <button
+            type="button"
+            className="admin-sidebar-backdrop"
+            aria-label="Close admin menu"
+            onClick={() => setAdminSidebarOpen(false)}
+          />
+        ) : null}
+
+        <aside className={`admin-sidebar ${adminSidebarOpen ? 'open' : ''}`}>
           <div className="admin-sidebar-brand">
             <div className="admin-sidebar-brand-top">
               <div className="admin-sidebar-logo">TFI</div>
@@ -546,6 +567,14 @@ function App() {
                 <span>Volunteer admin</span>
               </div>
             </div>
+            <button
+              type="button"
+              className="admin-sidebar-close"
+              aria-label="Close admin menu"
+              onClick={() => setAdminSidebarOpen(false)}
+            >
+              x
+            </button>
           </div>
 
           <label className="admin-sidebar-search">
@@ -560,11 +589,11 @@ function App() {
           </label>
 
           <nav className="admin-menu">
-            <button type="button" className="active"><span>01</span>Dashboard</button>
-            <button type="button"><span>02</span>Candidates</button>
-            <button type="button"><span>03</span>Availability</button>
-            <button type="button"><span>04</span>Locations</button>
-            <button type="button"><span>05</span>Reports</button>
+            <button type="button" className="active" onClick={closeAdminSidebar}><span>01</span>Dashboard</button>
+            <button type="button" onClick={closeAdminSidebar}><span>02</span>Candidates</button>
+            <button type="button" onClick={closeAdminSidebar}><span>03</span>Availability</button>
+            <button type="button" onClick={closeAdminSidebar}><span>04</span>Locations</button>
+            <button type="button" onClick={closeAdminSidebar}><span>05</span>Reports</button>
           </nav>
 
           <div className="admin-sidebar-group">
@@ -589,13 +618,16 @@ function App() {
             <p className="admin-sidebar-group-title">Pinned volunteers</p>
             <div className="admin-mini-list admin-quick-links">
               {sortedRegistrations.slice(0, 3).map((registration) => (
-                <button
-                  type="button"
-                  key={`${registration.userId}-sidebar`}
-                  className={`admin-mini-row admin-mini-button ${
-                    selectedRegistration?.userId === registration.userId ? 'active' : ''
-                  }`}
-                  onClick={() => setSelectedRegistrationId(registration.userId)}
+                  <button
+                    type="button"
+                    key={`${registration.userId}-sidebar`}
+                    className={`admin-mini-row admin-mini-button ${
+                      selectedRegistration?.userId === registration.userId ? 'active' : ''
+                    }`}
+                  onClick={() => {
+                    setSelectedRegistrationId(registration.userId);
+                    closeAdminSidebar();
+                  }}
                 >
                   <span>{registration.name}</span>
                   <small>{registration.location || 'Pending'}</small>
@@ -632,6 +664,16 @@ function App() {
                 }
               >
                 {adminTheme === 'light' ? 'Dark mode' : 'Light mode'}
+              </button>
+              <button
+                type="button"
+                className="admin-menu-toggle"
+                aria-label="Open admin menu"
+                onClick={() => setAdminSidebarOpen(true)}
+              >
+                <span />
+                <span />
+                <span />
               </button>
               <button type="button" className="ghost-button admin-refresh-button" disabled>
                 Live sync
@@ -826,167 +868,245 @@ function App() {
         </div>
       </header>
 
-      <main className="volunteer-card">
-        <aside className="volunteer-sidebar">
-          {stepMeta.map((step) => (
-            <button
-              type="button"
-              key={step.id}
-              className={`volunteer-step-link ${activeStep === step.id ? 'active' : ''}`}
-              onClick={() => moveStep(step.id)}
-            >
-              <span className="volunteer-step-number">{step.id}</span>
-              <span>{step.title}</span>
-            </button>
-          ))}
-        </aside>
+      {submissionComplete ? (
+        <main className="volunteer-card volunteer-success-card">
+          <aside className="volunteer-sidebar volunteer-success-sidebar">
+            <div className="success-step-badge">Success</div>
+            <div className="volunteer-step-link active">
+              <span className="volunteer-step-number">✓</span>
+              <span>Submitted</span>
+            </div>
+            <div className="volunteer-step-link">
+              <span className="volunteer-step-number">2</span>
+              <span>Review details</span>
+            </div>
+          </aside>
 
-        <section className="volunteer-form-panel">
-          <nav className="volunteer-top-nav" aria-label="Step navigation">
-            {stepMeta.map((step, index) => (
-              <div className="volunteer-top-nav-item" key={step.id}>
-                <button
-                  type="button"
-                  className={activeStep === step.id ? 'active' : ''}
-                  onClick={() => moveStep(step.id)}
-                  aria-current={activeStep === step.id ? 'step' : undefined}
-                >
-                  {step.title}
-                </button>
-                {index < stepMeta.length - 1 ? <span className="volunteer-nav-arrow">-&gt;</span> : null}
+          <section className="volunteer-form-panel volunteer-success-panel">
+            <div className="volunteer-success-hero" aria-label="Submission successful">
+              <div className="success-icon" aria-hidden="true">
+                ✓
               </div>
-            ))}
-          </nav>
+              <p className="success-eyebrow">Submission complete</p>
+              <h1>Your volunteer profile has been saved successfully.</h1>
+              <p className="success-copy">
+                Thanks, {currentUser.name || 'volunteer'}. We’ve stored your registration and you can return to edit it anytime.
+              </p>
+            </div>
 
-          <div className="volunteer-form-header">
-            <h1>
-              {activeStep === 1
-                ? 'Verify your contact information'
-                : 'Add your other details'}
-            </h1>
-            <p>{stepMeta.find((step) => step.id === activeStep)?.description}</p>
-          </div>
-
-          <form onSubmit={handleSave} className="volunteer-form">
-            {activeStep === 1 ? (
-              <div className="volunteer-fields">
-                <label>
-                  Name
-                  <input
-                    type="text"
-                    name="name"
-                    value={formData.name}
-                    onChange={handleFormChange}
-                    placeholder="Enter your full name"
-                    required
-                  />
-                </label>
-                <label>
-                  Email
-                  <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleFormChange}
-                    placeholder="example@email.com"
-                    required
-                  />
-                </label>
-                <label>
-                  Phone
-                  <input
-                    type="tel"
-                    name="contactNumber"
-                    value={formData.contactNumber}
-                    onChange={handleFormChange}
-                    placeholder="+91 98765 43210"
-                    required
-                  />
-                </label>
-                <label>
-                  DOB
-                  <input
-                    type="date"
-                    name="dateOfBirth"
-                    value={formData.dateOfBirth}
-                    onChange={handleFormChange}
-                    required
-                  />
-                </label>
-              </div>
-            ) : (
-              <div className="volunteer-fields">
-                <label>
-                  Location
-                  <input
-                    type="text"
-                    name="location"
-                    value={formData.location}
-                    onChange={handleFormChange}
-                    placeholder="City, State"
-                    required
-                  />
-                </label>
-                <label>
-                  Languages
-                  <input
-                    type="text"
-                    name="languages"
-                    value={formData.languages}
-                    onChange={handleFormChange}
-                    placeholder="English, Hindi, Marathi"
-                    required
-                  />
-                </label>
-                <fieldset className="availability-field volunteer-availability">
-                  <legend>Availability</legend>
-                  <div className="volunteer-checkbox-grid">
-                    {availabilityOptions.map((day) => (
-                      <label className="volunteer-checkbox" key={day}>
-                        <input
-                          type="checkbox"
-                          checked={formData.availability.includes(day)}
-                          onChange={() => handleAvailabilityToggle(day)}
-                        />
-                        <span>{day.slice(0, 3)}</span>
-                      </label>
-                    ))}
+            <div className="volunteer-success-grid">
+              <article className="success-summary-card">
+                <h2>Saved details</h2>
+                <dl>
+                  <div>
+                    <dt>Name</dt>
+                    <dd>{formData.name || currentUser.name || 'Not provided'}</dd>
                   </div>
-                </fieldset>
-              </div>
-            )}
+                  <div>
+                    <dt>Email</dt>
+                    <dd>{formData.email || currentUser.email}</dd>
+                  </div>
+                  <div>
+                    <dt>Location</dt>
+                    <dd>{formData.location || 'Not provided yet'}</dd>
+                  </div>
+                  <div>
+                    <dt>Languages</dt>
+                    <dd>{formData.languages || 'Not provided yet'}</dd>
+                  </div>
+                </dl>
+              </article>
 
-            {formMessage && <p className="inline-feedback volunteer-feedback">{formMessage}</p>}
-
-            <div className="volunteer-actions">
-              {activeStep === 1 ? (
-                <button
-                  type="button"
-                  className="primary-button volunteer-next-button"
-                  onClick={handleNextStep}
-                >
-                  Next -&gt;
-                </button>
-              ) : (
-                <>
+              <article className="success-summary-card">
+                <h2>Next steps</h2>
+                <p>We’ve marked your registration as complete. You can review the profile or update it if anything changes.</p>
+                <div className="success-actions">
                   <button
                     type="button"
                     className="ghost-button volunteer-back-button"
-                    onClick={() => moveStep(1)}
+                    onClick={() => {
+                      setSubmissionComplete(false);
+                      setActiveStep(2);
+                    }}
                   >
-                    &lt;- Back
+                    Edit submission
                   </button>
-                  <button type="submit" className="primary-button volunteer-next-button">
-                    Submit
+                  <button
+                    type="button"
+                    className="primary-button volunteer-next-button"
+                    onClick={handleLogout}
+                  >
+                    Finish
                   </button>
-                </>
-              )}
+                </div>
+              </article>
             </div>
-          </form>
-        </section>
-      </main>
+          </section>
+        </main>
+      ) : (
+        <main className="volunteer-card">
+          <aside className="volunteer-sidebar">
+            {stepMeta.map((step) => (
+              <button
+                type="button"
+                key={step.id}
+                className={`volunteer-step-link ${activeStep === step.id ? 'active' : ''}`}
+                onClick={() => moveStep(step.id)}
+              >
+                <span className="volunteer-step-number">{step.id}</span>
+                <span>{step.title}</span>
+              </button>
+            ))}
+          </aside>
+
+          <section className="volunteer-form-panel">
+            <nav className="volunteer-top-nav" aria-label="Step navigation">
+              {stepMeta.map((step, index) => (
+                <div className="volunteer-top-nav-item" key={step.id}>
+                  <button
+                    type="button"
+                    className={activeStep === step.id ? 'active' : ''}
+                    onClick={() => moveStep(step.id)}
+                    aria-current={activeStep === step.id ? 'step' : undefined}
+                  >
+                    {step.title}
+                  </button>
+                  {index < stepMeta.length - 1 ? <span className="volunteer-nav-arrow">-&gt;</span> : null}
+                </div>
+              ))}
+            </nav>
+
+            <div className="volunteer-form-header">
+              <h1>
+                {activeStep === 1
+                  ? 'Verify your contact information'
+                  : 'Add your other details'}
+              </h1>
+              <p>{stepMeta.find((step) => step.id === activeStep)?.description}</p>
+            </div>
+
+            <form onSubmit={handleSave} className="volunteer-form">
+              {activeStep === 1 ? (
+                <div className="volunteer-fields">
+                  <label>
+                    Name
+                    <input
+                      type="text"
+                      name="name"
+                      value={formData.name}
+                      onChange={handleFormChange}
+                      placeholder="Enter your full name"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Email
+                    <input
+                      type="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleFormChange}
+                      placeholder="example@email.com"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Phone
+                    <input
+                      type="tel"
+                      name="contactNumber"
+                      value={formData.contactNumber}
+                      onChange={handleFormChange}
+                      placeholder="+91 98765 43210"
+                      required
+                    />
+                  </label>
+                  <label>
+                    DOB
+                    <input
+                      type="date"
+                      name="dateOfBirth"
+                      value={formData.dateOfBirth}
+                      onChange={handleFormChange}
+                      required
+                    />
+                  </label>
+                </div>
+              ) : (
+                <div className="volunteer-fields">
+                  <label>
+                    Location
+                    <input
+                      type="text"
+                      name="location"
+                      value={formData.location}
+                      onChange={handleFormChange}
+                      placeholder="City, State"
+                      required
+                    />
+                  </label>
+                  <label>
+                    Languages
+                    <input
+                      type="text"
+                      name="languages"
+                      value={formData.languages}
+                      onChange={handleFormChange}
+                      placeholder="English, Hindi, Marathi"
+                      required
+                    />
+                  </label>
+                  <fieldset className="availability-field volunteer-availability">
+                    <legend>Availability</legend>
+                    <div className="volunteer-checkbox-grid">
+                      {availabilityOptions.map((day) => (
+                        <label className="volunteer-checkbox" key={day}>
+                          <input
+                            type="checkbox"
+                            checked={formData.availability.includes(day)}
+                            onChange={() => handleAvailabilityToggle(day)}
+                          />
+                          <span>{day.slice(0, 3)}</span>
+                        </label>
+                      ))}
+                    </div>
+                  </fieldset>
+                </div>
+              )}
+
+              {formMessage && <p className="inline-feedback volunteer-feedback">{formMessage}</p>}
+
+              <div className="volunteer-actions">
+                {activeStep === 1 ? (
+                  <button
+                    type="button"
+                    className="primary-button volunteer-next-button"
+                    onClick={handleNextStep}
+                  >
+                    Next -&gt;
+                  </button>
+                ) : (
+                  <>
+                    <button
+                      type="button"
+                      className="ghost-button volunteer-back-button"
+                      onClick={() => moveStep(1)}
+                    >
+                      &lt;- Back
+                    </button>
+                    <button type="submit" className="primary-button volunteer-next-button">
+                      Submit
+                    </button>
+                  </>
+                )}
+              </div>
+            </form>
+          </section>
+        </main>
+      )}
     </div>
   );
 }
 
 export default App;
+
