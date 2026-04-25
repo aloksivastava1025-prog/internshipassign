@@ -32,10 +32,7 @@ body {
   margin: 0;
   font-family: 'Inter', sans-serif;
   color: var(--text);
-  background:
-    radial-gradient(circle at top left, rgba(255, 203, 119, 0.45), transparent 28%),
-    radial-gradient(circle at bottom right, rgba(241, 90, 41, 0.18), transparent 26%),
-    linear-gradient(135deg, #f9efe5 0%, #f5e8d8 55%, #faeee2 100%);
+  background: url('https://gradientshub.com/gallery/free/gradients/thumbnails/720/21-blue-fractal-light-background.webp') center/cover no-repeat fixed;
   min-height: 100vh;
   overflow-x: hidden;
 }
@@ -60,15 +57,7 @@ button {
 }
 
 .auth-shell {
-  --auth-shell-bg:
-    repeating-linear-gradient(
-      180deg,
-      rgba(21, 28, 48, 0.05) 0,
-      rgba(21, 28, 48, 0.05) 1px,
-      transparent 1px,
-      transparent 28px
-    ),
-    linear-gradient(180deg, #ffffff 0%, #f7f8fb 100%);
+  --auth-shell-bg: url('https://gradientshub.com/gallery/free/gradients/thumbnails/720/21-blue-fractal-light-background.webp') center/cover no-repeat fixed;
   --auth-frame-bg: #ffffff;
   --auth-frame-border: rgba(28, 36, 52, 0.08);
   --auth-panel-bg: #ffffff;
@@ -96,8 +85,8 @@ button {
   --auth-social-border: rgba(137, 154, 181, 0.28);
   --auth-social-text: #111827;
   --auth-divider: rgba(137, 154, 181, 0.24);
-  --auth-primary-bg: #111827;
-  --auth-primary-text: #ffffff;
+  --auth-primary-bg: linear-gradient(135deg, #f8fafc 0%, #3b82f6 100%);
+  --auth-primary-text: #111827;
   --auth-note-bg: #f8fafc;
   --auth-note-border: rgba(137, 154, 181, 0.2);
   --auth-toggle-border: rgba(137, 154, 181, 0.3);
@@ -118,7 +107,7 @@ button {
 }
 
 .auth-shell.auth-theme-dark {
-  --auth-shell-bg: #050505;
+  --auth-shell-bg: url('https://gradientshub.com/gallery/free/gradients/thumbnails/720/21-blue-fractal-light-background.webp') center/cover no-repeat fixed;
   --auth-frame-bg: #050505;
   --auth-frame-border: #050505;
   --auth-panel-bg: #050505;
@@ -146,8 +135,8 @@ button {
   --auth-social-border: rgba(255, 255, 255, 0.12);
   --auth-social-text: #ffffff;
   --auth-divider: rgba(255, 255, 255, 0.12);
-  --auth-primary-bg: #ffffff;
-  --auth-primary-text: #111111;
+  --auth-primary-bg: linear-gradient(135deg, #eff6ff 0%, #3b82f6 100%);
+  --auth-primary-text: #111827;
   --auth-note-bg: rgba(255, 255, 255, 0.04);
   --auth-note-border: rgba(255, 255, 255, 0.08);
   --auth-toggle-border: rgba(255, 255, 255, 0.16);
@@ -167,6 +156,7 @@ button {
   box-shadow: none;
   height: 100vh;
   max-height: none;
+  position: relative;
 }
 
 .brand-panel,
@@ -182,7 +172,8 @@ button {
 }
 
 .brand-panel {
-  border-radius: 0;
+  border-radius: 5px;
+  margin: 16px;
   padding: 28px 32px 24px;
   position: relative;
   overflow: hidden;
@@ -190,9 +181,7 @@ button {
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  background:
-    var(--auth-brand-overlay),
-    url('/auth-gradient.jpg') center/cover no-repeat;
+  background: url('https://gradientshub.com/gallery/free/gradients/thumbnails/720/21-blue-fractal-light-background.webp') center/cover no-repeat;
   border: none;
   box-shadow: none;
   backdrop-filter: none;
@@ -210,22 +199,33 @@ button {
 .auth-step-list {
   position: relative;
   z-index: 1;
+  text-shadow: 0 1px 8px rgba(0, 0, 0, 0.5), 0 0 20px rgba(0, 0, 0, 0.3);
 }
 
 .auth-brand-lockup {
   display: inline-flex;
   align-items: center;
   gap: 12px;
-  margin: 0 auto;
-  color: var(--auth-brand-text);
+  position: absolute;
+  top: 40px;
+  right: 48px;
+  color: var(--auth-card-text);
   font-weight: 700;
+  z-index: 100;
+  transition: all 0.3s ease;
+}
+
+.auth-brand-lockup span {
+  font-size: 1.1rem;
+  letter-spacing: -0.01em;
 }
 
 .brand-dot {
-  width: 18px;
-  height: 18px;
-  border: 5px solid var(--auth-brand-border);
-  border-radius: 999px;
+  width: 20px;
+  height: 20px;
+  border: 5px solid #3b82f6;
+  border-radius: 5px;
+  box-shadow: 0 0 15px rgba(59, 130, 246, 0.4);
 }
 
 .brand-copy {
@@ -372,7 +372,7 @@ button {
   border: 1px solid var(--auth-toggle-border);
   background: transparent;
   color: var(--auth-card-text);
-  border-radius: 999px;
+  border-radius: 5px;
   min-height: 38px;
   padding: 8px 14px;
   font-size: 0.8rem;
@@ -381,7 +381,8 @@ button {
 
 .admin-entry-button.active {
   background: var(--auth-primary-bg);
-  color: var(--auth-primary-text);
+  color: #ffffff;
+  border-color: transparent;
 }
 
 .theme-toggle {
@@ -465,7 +466,7 @@ button {
 .auth-form .social-button,
 .auth-form .admin-entry-button,
 .auth-form .theme-toggle {
-  border-radius: 12px;
+  border-radius: 5px;
 }
 
 .auth-form .primary-button {
@@ -695,7 +696,22 @@ input:focus {
 }
 
 .admin-shell {
-  --admin-bg: #f4f7fb;
+  --admin-bg:
+    repeating-linear-gradient(
+      90deg,
+      rgba(21, 28, 48, 0.03) 0,
+      rgba(21, 28, 48, 0.03) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(21, 28, 48, 0.03) 0,
+      rgba(21, 28, 48, 0.03) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    #ffffff;
   --admin-sidebar-bg: #ffffff;
   --admin-panel-bg: #ffffff;
   --admin-panel-soft: #f7f9fc;
@@ -704,7 +720,7 @@ input:focus {
   --admin-muted: rgba(18, 23, 35, 0.62);
   --admin-card-muted: rgba(18, 23, 35, 0.54);
   --admin-invert: #ffffff;
-  --admin-button-bg: #111111;
+  --admin-button-bg: linear-gradient(135deg, #0f172a 0%, #1e40af 100%);
   --admin-button-text: #ffffff;
   --admin-tag-bg: #eef2f7;
   --admin-accent: #1f6feb;
@@ -720,7 +736,22 @@ input:focus {
 }
 
 .admin-theme-dark {
-  --admin-bg: #0f1115;
+  --admin-bg:
+    repeating-linear-gradient(
+      90deg,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    repeating-linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.03) 0,
+      rgba(255, 255, 255, 0.03) 1px,
+      transparent 1px,
+      transparent 40px
+    ),
+    #0f1115;
   --admin-sidebar-bg: #171a20;
   --admin-panel-bg: #171a20;
   --admin-panel-soft: #20242d;
@@ -729,8 +760,8 @@ input:focus {
   --admin-muted: rgba(255, 255, 255, 0.62);
   --admin-card-muted: rgba(255, 255, 255, 0.54);
   --admin-invert: #111111;
-  --admin-button-bg: #ffffff;
-  --admin-button-text: #111111;
+  --admin-button-bg: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  --admin-button-text: #ffffff;
   --admin-tag-bg: #232833;
   --admin-accent: #f4a259;
 }
@@ -1175,7 +1206,7 @@ input:focus {
 
 .analytics-card {
   padding: 18px;
-  border-radius: 0;
+  border-radius: 5px;
   background: var(--admin-panel-bg);
   border: 1px solid var(--admin-border);
 }
@@ -1318,7 +1349,7 @@ input:focus {
 .admin-panel {
   background: var(--admin-panel-bg);
   border: 1px solid var(--admin-border);
-  border-radius: 0;
+  border-radius: 5px;
   padding: 18px;
 }
 
@@ -1500,10 +1531,7 @@ input:focus {
 
 .volunteer-shell {
   min-height: 100vh;
-  background:
-    linear-gradient(180deg, rgba(255, 255, 255, 0.14), rgba(255, 255, 255, 0.08)),
-    radial-gradient(circle at top center, rgba(255, 255, 255, 0.26), transparent 30%),
-    url('/auth-gradient.jpg') center/cover no-repeat;
+  background: url('https://gradientshub.com/gallery/free/gradients/thumbnails/720/21-blue-fractal-light-background.webp') center/cover no-repeat fixed;
   padding: 20px;
   overflow: hidden;
   display: flex;
@@ -1536,6 +1564,28 @@ input:focus {
   font-size: 0.95rem;
   font-weight: 600;
   backdrop-filter: blur(8px);
+}
+
+.primary-button {
+  background: var(--auth-primary-bg);
+  color: var(--auth-primary-text);
+  border: none;
+  border-radius: 5px;
+  min-height: 52px;
+  padding: 0 32px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+.primary-button:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(59, 130, 246, 0.25);
+  opacity: 0.95;
 }
 
 .volunteer-brand {
@@ -2692,5 +2742,16 @@ input:focus {
   .candidate-primary span,
   .candidate-meta {
     font-size: 0.82rem;
+  }
+}
+
+@media (max-width: 900px) {
+  .brand-panel {
+    background:
+      var(--auth-brand-overlay),
+      url('https://gradientshub.com/gallery/free/gradients/thumbnails/720/21-blue-fractal-light-background.webp') center/cover no-repeat;
+    background-blend-mode: multiply;
+    margin: 0;
+    border-radius: 0;
   }
 }

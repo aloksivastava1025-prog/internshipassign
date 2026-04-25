@@ -15,7 +15,7 @@ import {
   setDoc,
   where,
 } from 'firebase/firestore';
-import { auth, db, googleProvider, hasFirebaseConfig } from './firebase';
+import { auth, db, googleProvider, githubProvider, hasFirebaseConfig } from './firebase';
 
 // ─── Constants ────────────────────────────────────────────────────────────────
 
@@ -210,6 +210,43 @@ export const signInWithGoogle = async () => {
   };
 
   // Upsert profile in Firestore — never overwrites role if already set
+  await setDoc(
+    doc(db, 'users', firebaseUser.uid),
+    {
+      ...sessionUser,
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+
+  saveSession(sessionUser);
+  return sessionUser;
+};
+
+// ─── Auth — Github ─────────────────────────────────────────────────────────────
+
+/**
+ * Opens a Github sign-in popup and upserts the volunteer profile in Firestore.
+ */
+export const signInWithGithub = async () => {
+  if (!hasFirebaseConfig || !auth || !githubProvider) {
+    throw new Error(
+      'Firebase is not configured. Add your VITE_FIREBASE_* keys to use Github Sign-In.',
+    );
+  }
+
+  const result = await signInWithPopup(auth, githubProvider);
+  const firebaseUser = result.user;
+
+  const sessionUser = {
+    id: firebaseUser.uid,
+    name: firebaseUser.displayName || firebaseUser.email,
+    email: firebaseUser.email,
+    role: 'volunteer',
+    provider: 'github',
+    photoURL: firebaseUser.photoURL || null,
+  };
+
   await setDoc(
     doc(db, 'users', firebaseUser.uid),
     {

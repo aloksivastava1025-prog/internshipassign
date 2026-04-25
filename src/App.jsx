@@ -9,6 +9,7 @@ import {
   persistenceMode,
   saveRegistration,
   signInWithGoogle,
+  signInWithGithub,
   signupUser,
   subscribeToRegistrationForUser,
   subscribeToRegistrations,
@@ -64,14 +65,15 @@ function App() {
   const [submissionComplete, setSubmissionComplete] = useState(false);
   const [registrations, setRegistrations] = useState([]);
   const [showPassword, setShowPassword] = useState(false);
-  const [authTheme, setAuthTheme] = useState('light');
-  const [adminTheme, setAdminTheme] = useState('light');
+  const [authTheme, setAuthTheme] = useState('dark');
+  const [adminTheme, setAdminTheme] = useState('dark');
   const [adminSidebarOpen, setAdminSidebarOpen] = useState(false);
   const [adminSearch, setAdminSearch] = useState('');
   const [selectedRegistrationId, setSelectedRegistrationId] = useState('');
   const [storageReady, setStorageReady] = useState(false);
   const [storageError, setStorageError] = useState('');
   const [googleLoading, setGoogleLoading] = useState(false);
+  const [githubLoading, setGithubLoading] = useState(false);
 
   useEffect(() => {
     const boot = async () => {
@@ -135,6 +137,20 @@ function App() {
       setAuthError(error.message);
     } finally {
       setGoogleLoading(false);
+    }
+  };
+
+  const handleGithubSignIn = async () => {
+    setAuthError('');
+    setGithubLoading(true);
+    try {
+      const user = await signInWithGithub();
+      setCurrentUser(user);
+      setActiveStep(1);
+    } catch (error) {
+      setAuthError(error.message);
+    } finally {
+      setGithubLoading(false);
     }
   };
 
@@ -262,6 +278,14 @@ function App() {
     setAdminSidebarOpen(false);
   };
 
+  const scrollToSection = (id) => {
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth' });
+    }
+    closeAdminSidebar();
+  };
+
   const filteredRegistrations = registrations.filter((registration) => {
     const search = adminSearch.trim().toLowerCase();
     if (!search) {
@@ -333,11 +357,6 @@ function App() {
       <div className={`app-shell auth-shell auth-theme-${authTheme}`}>
         <main className="auth-layout">
           <section className="brand-panel" aria-label="Teach For India introduction">
-            <div className="auth-brand-lockup">
-              <div className="brand-dot" />
-              <span>Teach For India</span>
-            </div>
-
             <div className="brand-copy">
               <h1>{mode === 'signup' ? 'Get Started with Us' : 'Welcome Back'}</h1>
               <p>
@@ -363,6 +382,11 @@ function App() {
             </div>
           </section>
 
+          <div className="auth-brand-lockup">
+            <div className="brand-dot" />
+            <span>Teach For India</span>
+          </div>
+
           <section className="auth-card-section">
             <div className="auth-card">
               <div className="auth-card-topbar">
@@ -371,18 +395,23 @@ function App() {
                     type="button"
                     className={`admin-entry-button ${authEntry === 'admin' ? 'active' : ''}`}
                     onClick={() => {
-                      setAuthEntry((previous) =>
-                        previous === 'admin' ? 'volunteer' : 'admin',
-                      );
+                      const willBeAdmin = authEntry !== 'admin';
+                      setAuthEntry(willBeAdmin ? 'admin' : 'volunteer');
                       setMode('login');
                       setAuthError('');
-                      setAuthForm((previous) => ({
-                        ...previous,
-                        email:
-                          authEntry === 'admin' ? '' : adminCredentials.email,
-                        password:
-                          authEntry === 'admin' ? '' : adminCredentials.password,
-                      }));
+                      if (willBeAdmin) {
+                        setAuthForm({
+                          ...authForm,
+                          email: adminCredentials.email,
+                          password: adminCredentials.password,
+                        });
+                      } else {
+                        setAuthForm({
+                          ...authForm,
+                          email: '',
+                          password: '',
+                        });
+                      }
                     }}
                   >
                     Admin
@@ -426,10 +455,19 @@ function App() {
                       type="button"
                       className="social-button"
                       onClick={handleGoogleSignIn}
-                      disabled={googleLoading}
+                      disabled={googleLoading || githubLoading}
                     >
                       <span className="social-mark google">G</span>
-                      {googleLoading ? 'Signing in…' : 'Google'}
+                      {googleLoading ? '...' : 'Google'}
+                    </button>
+                    <button
+                      type="button"
+                      className="social-button"
+                      onClick={handleGithubSignIn}
+                      disabled={googleLoading || githubLoading}
+                    >
+                      <span className="social-mark github">Gh</span>
+                      {githubLoading ? '...' : 'Github'}
                     </button>
                   </div>
 
@@ -528,17 +566,8 @@ function App() {
                   >
                     {mode === 'signup' ? 'Log in' : 'Sign up'}
                   </button>
-                </p>
+              </p>
               ) : null}
-
-              <div className="admin-note">
-                <p>{authEntry === 'admin' ? 'Admin access' : 'Admin demo'}</p>
-                <span>{adminCredentials.email}</span>
-                <span>{adminCredentials.password}</span>
-                <span className="persistence-note">
-                  Persistence mode: {persistenceMode === 'firebase' ? 'Firebase live' : 'Setup required'}
-                </span>
-              </div>
             </div>
           </section>
         </main>
@@ -589,11 +618,11 @@ function App() {
           </label>
 
           <nav className="admin-menu">
-            <button type="button" className="active" onClick={closeAdminSidebar}><span>01</span>Dashboard</button>
-            <button type="button" onClick={closeAdminSidebar}><span>02</span>Candidates</button>
-            <button type="button" onClick={closeAdminSidebar}><span>03</span>Availability</button>
-            <button type="button" onClick={closeAdminSidebar}><span>04</span>Locations</button>
-            <button type="button" onClick={closeAdminSidebar}><span>05</span>Reports</button>
+            <button type="button" className="active" onClick={() => scrollToSection('dashboard')}><span>01</span>Dashboard</button>
+            <button type="button" onClick={() => scrollToSection('candidates')}><span>02</span>Candidates</button>
+            <button type="button" onClick={() => scrollToSection('availability')}><span>03</span>Availability</button>
+            <button type="button" onClick={() => scrollToSection('locations')}><span>04</span>Locations</button>
+            <button type="button" onClick={() => scrollToSection('dashboard')}><span>05</span>Reports</button>
           </nav>
 
           <div className="admin-sidebar-group">
@@ -694,7 +723,7 @@ function App() {
             </div>
           ) : null}
 
-          <section className="admin-section">
+          <section className="admin-section" id="dashboard">
             <div className="admin-section-heading">
               <div>
                 <h2>Registration overview</h2>
@@ -714,7 +743,7 @@ function App() {
                 <p>{filteredRegistrations.length} visible in current search</p>
               </article>
 
-              <article className="analytics-card">
+              <article className="analytics-card" id="locations">
                 <div className="analytics-header">
                   <span>Cities covered</span>
                   <strong>{uniqueLocations}</strong>
@@ -738,7 +767,7 @@ function App() {
                 <p>Distinct spoken languages submitted by volunteers</p>
               </article>
 
-              <article className="analytics-card">
+              <article className="analytics-card" id="availability">
                 <div className="analytics-header">
                   <span>Top availability</span>
                   <strong>{topDay.day}</strong>
@@ -751,7 +780,7 @@ function App() {
             </div>
           </section>
 
-          <section className="admin-section">
+          <section className="admin-section" id="candidates">
             <div>
               <h2>Candidate management</h2>
               <p>Inspect every registration and review submitted volunteer information.</p>
