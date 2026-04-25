@@ -2747,32 +2747,32 @@ input:focus {
 
 @media (max-width: 900px) {
   .auth-layout {
-    grid-template-columns: 1fr;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
     height: auto;
-    overflow-y: auto;
+    background: var(--auth-frame-bg);
   }
 
   .brand-panel {
     background: url('https://gradientshub.com/gallery/free/gradients/thumbnails/720/21-blue-fractal-light-background.webp') center/cover no-repeat;
     margin: 0;
     border-radius: 0;
-    min-height: 280px;
+    min-height: 240px;
     padding: 60px 24px 40px;
     display: flex;
     flex-direction: column;
     justify-content: center;
-  }
-
-  .brand-panel::after {
-    display: none;
+    position: relative;
   }
 
   .auth-brand-lockup {
     position: absolute;
-    top: 20px;
-    left: 20px;
+    top: 24px;
+    left: 24px;
     right: auto;
     color: #ffffff;
+    z-index: 10;
   }
 
   .brand-copy {
@@ -2790,8 +2790,9 @@ input:focus {
   }
 
   .auth-card-section {
-    padding: 32px 16px;
+    padding: 40px 20px 60px;
     background: var(--auth-frame-bg);
+    flex: 1;
   }
 
   .auth-card {
